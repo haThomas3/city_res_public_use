@@ -35,6 +35,8 @@ export class CameraRig {
   focusTilt: number | null = null;
   /** Zoom limit for fly-to (a focused building may come closer than the wheel allows). */
   static readonly FOCUS_MAX_ZOOM = 9;
+  /** The map may zoom this much past its framing, close enough to read the neon signs on the buildings. */
+  static readonly CLOSE_UP = 1.8;
 
   /**
    * How far (world units) the view slides toward the far half of the island when zoomed in on the map.
@@ -110,7 +112,7 @@ export class CameraRig {
 
   /** Closest zoom the map allows (the framing above). */
   get mapMaxZoom(): number {
-    return this.zoomFrame(this.tiltGoal).zMax;
+    return this.zoomFrame(this.tiltGoal).zMax * CameraRig.CLOSE_UP;
   }
 
   /** 0 = whole-island view, 1 = fully zoomed in on the map (always 0 while a building is in focus). */
