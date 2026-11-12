@@ -9,7 +9,7 @@
 import * as THREE from 'three';
 import { LAYOUT, type PlacedProject } from '../data/model';
 import { rngFor } from './rng';
-import { plaqueTexture, signTexture, windowTextures, WINDOW_VARIANTS } from './textures';
+import { cautionTexture, plaqueTexture, signTexture, windowTextures, WINDOW_VARIANTS } from './textures';
 
 const WALLS = ['#8c6f5c', '#5f7594', '#6d5f80', '#7b8a68', '#9b7b63', '#56707a', '#84698a', '#a08a6e'];
 const MOSS = '#6c9a52';
@@ -40,7 +40,14 @@ export interface BuildingHandle {
   dispose(): void;
 }
 
-export function createBuilding(pp: PlacedProject, opts: { shadows: boolean }): BuildingHandle {
+/** Where the building stands in the city: its district wedge, so a construction fence can stay on the grass. */
+export interface SiteBounds {
+  start: number;
+  end: number;
+  outerR: number;
+}
+
+export function createBuilding(pp: PlacedProject, opts: { shadows: boolean; site?: SiteBounds }): BuildingHandle {
   const rng = rngFor(pp.project.id);
   const accent = new THREE.Color(pp.district.color);
   const wallColor = new THREE.Color(WALLS[Math.floor(rng() * WALLS.length)]).lerp(accent, 0.12);
@@ -212,6 +219,40 @@ export function createBuilding(pp: PlacedProject, opts: { shadows: boolean }): B
     }
     const tape = mesh(new THREE.BoxGeometry(w0 + 0.06, 0.07, d0 + 0.06), neonMat(new THREE.Color('#ffb000')));
     tape.position.y = 0.07;
+
+    // A white dust sheet pinned over the right 37% of the neon sign, to keep it clean while the site is busy.
+    {
+      const signH = signW / 4;
+      const sheetW = signW * 0.37;
+      const cy = n === 1 ? fh - signW / 8 - 0.04 : signFloor * fh + fh * 0.55;
+      const geo = own(new THREE.PlaneGeometry(1, 1, 12, 6));
+      const pos = geo.attributes.position;
+      const rightX = signW / 2 + 0.05;
+      for (let i = 0; i < pos.count; i++) {
+        const u = pos.getX(i) + 0.5; // 0 = left edge, 1 = right edge
+        const v = pos.getY(i) + 0.5; // 0 = bottom, 1 = top
+        // Left edge slants: the top corner is pinned further left than the bottom, so the cloth hangs in a diagonal.
+        const leftX = rightX - sheetW * (0.82 + 0.3 * v) - 0.04;
+        const x = leftX + u * (rightX - leftX);
+        const y = cy - signH * 0.62 + v * signH * 1.36;
+        const fold = Math.sin(u * 11 + v * 3.2) * 0.012 + (1 - v) * 0.02 * Math.sin(u * 5);
+        pos.setXYZ(i, x, y, depths[signFloor] / 2 + 0.045 + fold + (1 - v) * 0.015);
+      }
+      geo.computeVertexNormals();
+      const sheet = mesh(
+        geo,
+        own(new THREE.MeshStandardMaterial({ color: '#f6f3ec', roughness: 1, flatShading: true, side: THREE.DoubleSide })),
+      );
+      sheet.castShadow = false;
+      // Two strips of tape holding the top corners.
+      const tapeMat = own(new THREE.MeshStandardMaterial({ color: '#d8c79a', roughness: 0.8 }));
+      for (const tx of [rightX - 0.1, rightX - sheetW * 1.1]) {
+        const strip = mesh(new THREE.BoxGeometry(0.12, 0.035, 0.01), tapeMat);
+        strip.position.set(tx, cy + signH * 0.66, depths[signFloor] / 2 + 0.07);
+        strip.rotation.z = 0.25;
+        strip.castShadow = false;
+      }
+    }
     // Tower crane: mast beside the building, jib out over it, counterweight, hook on a cable.
     const mastH = top + 1.5;
     const mx = -w0 / 2 - 0.35;
@@ -252,7 +293,41 @@ export function createBuilding(pp: PlacedProject, opts: { shadows: boolean }): B
     const wood = own(new THREE.MeshStandardMaterial({ color: '#b8864b', roughness: 0.95 }));
     const woodDark = own(new THREE.MeshStandardMaterial({ color: '#8a6234', roughness: 0.95 }));
     const brickMats = ['#b5482f', '#a23f29', '#c15a3c'].map((c) => own(new THREE.MeshStandardMaterial({ color: c, roughness: 0.9 })));
-    const px = w0 / 2 + 0.7;
+    // Fence rectangle (local coordinates), shrunk until it stays on the district's grass: inside the wedge, clear of the
+    // radial roads, the ring road and the island edge.
+    const minFx = w0 / 2 + 0.55;
+    const minFz = d0 / 2 + 0.7;
+    let fx = w0 / 2 + 1.25;
+    let fz = d0 / 2 + 0.95;
+    const bounds = opts.site;
+    if (bounds) {
+      const yaw = Math.atan2(-Math.cos(pp.angle), -Math.sin(pp.angle));
+      const cs = Math.cos(yaw);
+      const sn = Math.sin(yaw);
+      const roadHalf = 0.55 + 0.25;
+      const innerR = LAYOUT.ringRoadR + LAYOUT.ringRoadW / 2 + 0.25;
+      const width = bounds.end - bounds.start;
+      const onGrass = (lx: number, lz: number) => {
+        const wx = pp.x + cs * lx + sn * lz;
+        const wz = pp.z - sn * lx + cs * lz;
+        const r = Math.hypot(wx, wz);
+        if (r < innerR || r > bounds.outerR - 0.5) return false;
+        let rel = (Math.atan2(wz, wx) - bounds.start) % (Math.PI * 2);
+        if (rel < 0) rel += Math.PI * 2;
+        if (rel > width) return false;
+        return r * Math.sin(rel) >= roadHalf && r * Math.sin(width - rel) >= roadHalf;
+      };
+      const fits = (ax: number, az: number) => {
+        for (const sx of [-1, -0.5, 0, 0.5, 1]) for (const sz of [-1, 1]) if (!onGrass(sx * ax, sz * az)) return false;
+        for (const sz of [-0.5, 0, 0.5]) for (const sx of [-1, 1]) if (!onGrass(sx * ax, sz * az)) return false;
+        return true;
+      };
+      while (!fits(fx, fz) && (fx > minFx || fz > minFz)) {
+        fx = Math.max(minFx, fx - 0.05);
+        fz = Math.max(minFz, fz - 0.05);
+      }
+    }
+    const px = Math.min(w0 / 2 + 0.7, fx - 0.3);
     const pz = -d0 * 0.1;
     const PW = 0.56;
     const PD = 0.4;
@@ -283,8 +358,6 @@ export function createBuilding(pp: PlacedProject, opts: { shadows: boolean }): B
     const orange = own(new THREE.MeshStandardMaterial({ color: '#ff7a00', roughness: 0.6 }));
     const yel = own(new THREE.MeshStandardMaterial({ color: '#ffd400', roughness: 0.6 }));
     const post = own(new THREE.MeshStandardMaterial({ color: '#4a4f58', roughness: 0.7 }));
-    const fx = w0 / 2 + 1.25;
-    const fz = d0 / 2 + 0.95;
     const FH = 0.34;
     const run = (x1: number, z1: number, x2: number, z2: number, gap?: [number, number]) => {
       const len = Math.hypot(x2 - x1, z2 - z1);
@@ -313,10 +386,17 @@ export function createBuilding(pp: PlacedProject, opts: { shadows: boolean }): B
     run(-fx, -fz, fx, -fz); // back
     run(-fx, -fz, -fx, fz); // left
     run(fx, -fz, fx, fz); // right
-    // Warning sign on a post beside the gate.
+    // Caution board on two posts beside the gate (Hebrew and English).
     const sx = -fx * 0.4;
-    add(new THREE.CylinderGeometry(0.018, 0.018, 0.5, 6), post, sx, 0.25, fz + 0.06);
-    add(new THREE.BoxGeometry(0.2, 0.2, 0.02), yel, sx, 0.52, fz + 0.07).rotation.z = Math.PI / 4;
+    for (const dx of [-0.13, 0.13]) add(new THREE.CylinderGeometry(0.014, 0.014, 0.36, 6), post, sx + dx, 0.18, fz + 0.06);
+    const board = add(
+      new THREE.PlaneGeometry(0.36, 0.27),
+      own(new THREE.MeshBasicMaterial({ map: cautionTexture(), toneMapped: false })),
+      sx,
+      0.42,
+      fz + 0.075,
+    );
+    board.castShadow = false;
   }
 
   // Picking volume.

@@ -108,6 +108,47 @@ export function signTexture(text: string, color: string): THREE.Texture {
   return tex;
 }
 
+/** Yellow "caution, building site" board, in Hebrew and English. 4:3 aspect. */
+export function cautionTexture(): THREE.Texture {
+  const key = 'caution';
+  const hit = cache.get(key);
+  if (hit) return hit;
+  const { c, ctx } = makeCanvas(512, 384);
+  ctx.fillStyle = '#ffcf00';
+  ctx.fillRect(0, 0, 512, 384);
+  ctx.strokeStyle = '#111111';
+  ctx.lineWidth = 14;
+  ctx.strokeRect(10, 10, 492, 364);
+  // Warning triangle with an exclamation mark.
+  ctx.fillStyle = '#111111';
+  ctx.beginPath();
+  ctx.moveTo(256, 36);
+  ctx.lineTo(318, 142);
+  ctx.lineTo(194, 142);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = '#ffcf00';
+  ctx.fillRect(250, 66, 12, 44);
+  ctx.beginPath();
+  ctx.arc(256, 124, 7, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#111111';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.font = '800 70px Rubik, Arial, sans-serif';
+  ctx.fillText('זהירות! כאן בונים', 256, 198);
+  ctx.fillRect(40, 244, 432, 6);
+  ctx.font = '800 44px Rubik, Arial, sans-serif';
+  ctx.fillText('CAUTION', 256, 290);
+  ctx.font = '700 36px Rubik, Arial, sans-serif';
+  ctx.fillText('CONSTRUCTION SITE', 256, 336);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = 4;
+  cache.set(key, tex);
+  return tex;
+}
+
 const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
 
 /** Bronze "founded" plaque: "EST." over "OCT 2026", 8:5 aspect. `founded` is "YYYY-MM". */
