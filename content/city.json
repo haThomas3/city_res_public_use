@@ -1,0 +1,91 @@
+{
+  "site": { "clarityId": "" },
+  "owner": {
+    "name": "Alex Example",
+    "initials": "AE",
+    "role": { "en": "Sample portfolio: replace everything in this file", "he": "תיק עבודות לדוגמה: מחליפים את כל התוכן בקובץ הזה" },
+    "bio": {
+      "en": "This is invented sample content. Alex Example and the projects below do not exist. Replace this text with a short bio about you.",
+      "he": "זה תוכן לדוגמה שהומצא. אלכס אקזמפל והפרויקטים כאן לא קיימים. מחליפים את הטקסט הזה בביוגרפיה קצרה עליך."
+    },
+    "links": [
+      { "label": "GitHub", "url": "https://github.com/your-username" },
+      { "label": "LinkedIn", "url": "https://www.linkedin.com/in/your-name" },
+      { "label": "Email", "url": "mailto:you@example.com" }
+    ]
+  },
+  "districts": [
+    { "id": "web", "name": { "en": "Web Apps", "he": "אפליקציות ווב" }, "color": "#38e8ff",
+      "blurb": { "en": "Sample district: things that run in a browser.", "he": "רובע לדוגמה: דברים שרצים בדפדפן." } },
+    { "id": "data", "name": { "en": "Data & Research", "he": "דאטה ומחקר" }, "color": "#a98bff",
+      "blurb": { "en": "Sample district: analysis and experiments.", "he": "רובע לדוגמה: ניתוחים וניסויים." } },
+    { "id": "construction", "name": { "en": "Construction Site", "he": "אתר בנייה" }, "color": "#ffb000",
+      "blurb": { "en": "Projects that are planned or not finished yet.", "he": "פרויקטים מתוכננים או שעוד לא גמורים." } }
+  ],
+  "projects": [
+    {
+      "id": "sample-todo-app",
+      "founded": "2026-01",
+      "district": "web",
+      "tier": "featured",
+      "access": "public",
+      "title": "Sample Todo App",
+      "tagline": { "en": "An invented project that shows what a featured building looks like.", "he": "פרויקט מומצא שמראה איך נראה בניין מרכזי." },
+      "description": { "en": "Describe the project here: what it does, why you built it, what was hard. The text appears behind the Full description button. This project is made up.", "he": "מתארים כאן את הפרויקט: מה הוא עושה, למה בנית אותו, מה היה קשה. הטקסט מופיע מאחורי הכפתור תיאור מלא. הפרויקט הזה מומצא." },
+      "myRole": { "en": "Everything: design, code and deployment.", "he": "הכול: עיצוב, קוד ופרסום." },
+      "stack": ["TypeScript", "React", "Node.js"],
+      "metrics": [{ "value": "42", "label": { "en": "tests", "he": "בדיקות" } }],
+      "links": { "github": "https://github.com/your-username/sample-todo-app" },
+      "floors": [
+        { "name": { "en": "Frontend", "he": "פרונטאנד" }, "detail": { "en": "The browser UI.", "he": "הממשק בדפדפן." } },
+        { "name": { "en": "API", "he": "API" }, "detail": { "en": "REST endpoints.", "he": "נקודות קצה של REST." } },
+        { "name": { "en": "Database", "he": "מסד נתונים" }, "detail": { "en": "Storage for tasks.", "he": "אחסון משימות." } }
+      ],
+      "size": { "linesOfCode": 3000, "tests": 42, "months": 2, "teamSize": 1 },
+      "sign": "TODO"
+    },
+    {
+      "id": "sample-analysis",
+      "founded": "2025-09",
+      "district": "data",
+      "tier": "more",
+      "access": "public",
+      "title": "Sample Data Analysis",
+      "tagline": { "en": "Another invented project, this one in a second district.", "he": "עוד פרויקט מומצא, הפעם ברובע שני." },
+      "stack": ["Python", "pandas"],
+      "floors": [
+        { "name": { "en": "Cleaning", "he": "ניקוי" } },
+        { "name": { "en": "Charts", "he": "גרפים" } }
+      ],
+      "size": { "linesOfCode": 900, "months": 1, "teamSize": 1 }
+    },
+    {
+      "id": "sample-dashboard",
+      "founded": "2025-11",
+      "district": "data",
+      "tier": "more",
+      "access": "private",
+      "title": "Sample Client Dashboard",
+      "tagline": { "en": "A private project: no source link, shown as client work.", "he": "פרויקט פרטי: בלי קישור לקוד, מוצג כעבודת לקוח." },
+      "stack": ["Python", "SQL"],
+      "size": { "linesOfCode": 1500, "months": 2, "teamSize": 1 }
+    },
+    {
+      "id": "sample-in-progress",
+      "district": "construction",
+      "status": "construction",
+      "tier": "more",
+      "access": "public",
+      "title": "Sample Unfinished Project",
+      "tagline": { "en": "Projects that are not ready yet stand here, with a crane, scaffolding and a safety fence.", "he": "פרויקטים שעוד לא מוכנים עומדים כאן, עם מנוף, פיגומים וגדר בטיחות." },
+      "stack": ["Rust"],
+      "floors": [{ "name": { "en": "Core", "he": "ליבה" } }, { "name": { "en": "CLI", "he": "CLI" } }],
+      "size": { "teamSize": 1 },
+      "sign": "SOON"
+    }
+  ],
+  "connections": [
+    { "a": "sample-analysis", "b": "sample-dashboard", "level": 2,
+      "why": { "en": "Both analyse data with the same tools.", "he": "שניהם מנתחים נתונים עם אותם כלים." } }
+  ]
+}

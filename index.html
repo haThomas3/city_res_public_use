@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en" dir="ltr" class="no-js">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Your Name · Portfolio City</title>
+    <meta name="description" content="An interactive 3D city where every building is a project." />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Your Name · Portfolio City" />
+    <meta property="og:description" content="An interactive 3D city where every building is a project." />
+    
+    <meta name="theme-color" content="#1b2438" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%231b2438' stroke='%2338e8ff' stroke-width='4'/%3E%3Ctext x='32' y='42' font-family='Arial' font-weight='700' font-size='26' fill='%23e9fbff' text-anchor='middle'%3EYN%3C/text%3E%3C/svg%3E" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <script>document.documentElement.classList.replace('no-js', 'js');</script>
+  </head>
+  <body>
+    <div class="page">
+      <header class="topbar">
+        <a class="brand" href="#/" aria-label="Your Name">
+          <span class="brand-badge" aria-hidden="true">YN</span>
+          <span class="brand-text">
+            <strong>Your Name</strong>
+            <small data-i18n="subtitle">Every building is a project</small>
+          </span>
+        </a>
+        <div class="search-wrap">
+          <input id="search" type="search" autocomplete="off" data-i18n-ph="search" placeholder="Search projects or tech" aria-controls="search-results" />
+          <ul id="search-results" class="search-results" hidden></ul>
+        </div>
+        <nav class="top-actions">
+          <button id="btn-list" class="btn" type="button" data-i18n="listView">List view</button>
+          <button id="btn-about" class="btn" type="button" data-i18n="about">About me</button>
+          <a id="lnk-linkedin" class="icon-btn icon-link" href="https://www.linkedin.com/" target="_blank" rel="noopener" data-i18n-title="linkedin" title="LinkedIn profile"><span aria-hidden="true">in</span></a>
+          <button id="btn-theme" class="icon-btn" type="button">◐</button>
+          <button id="btn-lang" class="btn btn-lang" type="button" data-i18n="language" lang="he">עברית</button>
+        </nav>
+      </header>
+
+      <main class="frame">
+        <div class="frame-chrome" aria-hidden="true">
+          <span class="dots"><i></i><i></i><i></i></span>
+          <span class="url">your-name.github.io/your-repo</span>
+        </div>
+        <div id="stage" class="stage">
+          <canvas id="city" aria-label="Interactive 3D map of projects"></canvas>
+          <div id="labels" class="labels"></div>
+          <div id="tooltip" class="tooltip" hidden></div>
+          <div class="map-controls">
+            <label class="tilt-dial" id="tilt-dial" data-i18n-title="tilt">
+              <svg viewBox="0 0 46 46" aria-hidden="true">
+                <path class="tilt-ground" d="M3 40H43" />
+                <path class="tilt-track" d="M9 10A30 30 0 0 1 34.98 25" />
+                <g class="tilt-ticks">
+                  <path d="M9 14V9" /><path d="M16.76 15.02l1.3-4.83" /><path d="M24 18.02l2.5-4.33" /><path d="M27.38 21.62l3.54-3.54" /><path d="M31.52 27l4.33-2.5" />
+                </g>
+                <g id="tilt-needle">
+                  <path class="tilt-needle" d="M9 40V12" />
+                  <circle class="tilt-eye" cx="9" cy="12" r="3.2" />
+                </g>
+                <circle class="tilt-pivot" cx="9" cy="40" r="2.4" />
+              </svg>
+              <span class="tilt-val" id="tilt-val">45°</span>
+              <input id="tilt" class="visually-hidden" data-i18n-title="tilt" type="range" min="0" max="60" step="1" value="45" />
+            </label>
+            <button id="rot-left" class="icon-btn" type="button" data-i18n-title="rotateLeft">↺</button>
+            <button id="rot-right" class="icon-btn" type="button" data-i18n-title="rotateRight">↻</button>
+            <button id="zoom-out" class="icon-btn" type="button" data-i18n-title="zoomOut">−</button>
+            <button id="zoom-in" class="icon-btn" type="button" data-i18n-title="zoomIn">+</button>
+          </div>
+          <button id="btn-list-mobile" class="btn btn-primary list-fab" type="button" data-i18n="listView">List view</button>
+          <div id="hint" class="hint" role="status"></div>
+          <aside id="card" class="card" hidden aria-live="polite"></aside>
+          <section id="project" class="project" hidden></section>
+          <div id="loading" class="loading" data-i18n="loading">Building the city…</div>
+        </div>
+      </main>
+    </div>
+
+    <div id="about" class="modal-backdrop" hidden></div>
+
+    <section id="list-view" class="list-view"><!--STATIC_LIST--></section>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
