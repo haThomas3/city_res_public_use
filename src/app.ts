@@ -101,7 +101,7 @@ export class App {
 
     for (const pp of this.model.projects) {
       const sec = this.model.sectors[pp.districtIndex];
-      const b = createBuilding(pp, { shadows, site: sec ? { start: sec.start, end: sec.end, outerR: this.model.radius } : undefined });
+      const b = createBuilding(pp, { shadows, site: sec ? { start: sec.start, end: sec.end, outerR: this.model.radius, streets: sec.streets } : undefined });
       if (!this.reducedMotion) b.body.scale.y = 0.001;
       this.ctx.scene.add(b.group);
       this.buildings.set(pp.project.id, b);

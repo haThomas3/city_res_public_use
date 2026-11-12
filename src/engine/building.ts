@@ -45,6 +45,8 @@ export interface SiteBounds {
   start: number;
   end: number;
   outerR: number;
+  /** Radii of the second-row streets in this district. */
+  streets?: number[];
 }
 
 export function createBuilding(pp: PlacedProject, opts: { shadows: boolean; site?: SiteBounds }): BuildingHandle {
@@ -312,6 +314,7 @@ export function createBuilding(pp: PlacedProject, opts: { shadows: boolean; site
         const wz = pp.z - sn * lx + cs * lz;
         const r = Math.hypot(wx, wz);
         if (r < innerR || r > bounds.outerR - 0.5) return false;
+        if (bounds.streets?.some((sr) => Math.abs(r - sr) < LAYOUT.streetW / 2 + 0.2)) return false;
         let rel = (Math.atan2(wz, wx) - bounds.start) % (Math.PI * 2);
         if (rel < 0) rel += Math.PI * 2;
         if (rel > width) return false;

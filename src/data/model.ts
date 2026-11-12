@@ -22,6 +22,8 @@ export const LAYOUT = {
   spacing: 1.0,
   edgePad: 0.9,
   floorH: 1.0,
+  /** Width of a second-row street (the ring road is ringRoadW wide, the radial roads 1.1). */
+  streetW: 0.9,
 } as const;
 
 /** Extra room between two buildings that share a park. */
@@ -54,6 +56,8 @@ export interface Sector {
   start: number;
   end: number;
   mid: number;
+  /** Radii of the second-row streets: arcs between two rings of buildings (only in districts with 2+ rings). */
+  streets: number[];
 }
 
 export interface PlacedConnection {
@@ -183,7 +187,7 @@ export function buildCityModel(data: CityData): CityModel {
   const sectors: Sector[] = [];
   let a = -Math.PI / 2 - spans[0] / 2;
   data.districts.forEach((d, i) => {
-    sectors.push({ district: d, index: i, start: a, end: a + spans[i], mid: a + spans[i] / 2 });
+    sectors.push({ district: d, index: i, start: a, end: a + spans[i], mid: a + spans[i] / 2, streets: [] });
     a += spans[i];
   });
 
@@ -207,6 +211,7 @@ export function buildCityModel(data: CityData): CityModel {
     const auto = unitsFor(items.filter((m) => !m.project.place), data);
     const span = sec.end - sec.start;
     let r: number = LAYOUT.firstRing;
+    let prevOuter: number | null = null;
     let q = 0;
     while (q < auto.length) {
       const ring: Unit[] = [];
@@ -222,8 +227,16 @@ export function buildCityModel(data: CityData): CityModel {
         ringMax = nextMax;
         q++;
       }
-      const rc = r + ringMax / 2;
-      const avail = span * rc - 2 * LAYOUT.edgePad;
+      // A ring wider than its wedge would spill onto the roads: push it outwards until it fits.
+      let rc = r + ringMax / 2;
+      let avail = span * rc - 2 * LAYOUT.edgePad;
+      for (let guard = 0; span * rc - 0.2 < width && guard < 60; guard++) {
+        r += 0.25;
+        rc = r + ringMax / 2;
+        avail = span * rc - 2 * LAYOUT.edgePad;
+      }
+      // The gap between this ring and the one before it gets a street of its own.
+      if (prevOuter !== null) sec.streets.push((prevOuter + (rc - ringMax / 2)) / 2);
       const gap = Math.max(0, avail - width) / ring.length;
       // If the ring is wider than the wedge, centre it on the wedge.
       let s = avail >= width ? sec.start + LAYOUT.edgePad / rc : sec.mid - width / (2 * rc);
@@ -236,7 +249,8 @@ export function buildCityModel(data: CityData): CityModel {
         });
         s += gap / 2 / rc;
       }
-      r = rc + ringMax / 2 + LAYOUT.street;
+      prevOuter = rc + ringMax / 2;
+      r = prevOuter + LAYOUT.street;
     }
 
     for (const m of items.filter((it) => it.project.place)) {

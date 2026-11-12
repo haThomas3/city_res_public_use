@@ -78,6 +78,19 @@ export function createWorld(model: CityModel, opts: { lowPower: boolean; shadows
     bridge.castShadow = opts.shadows;
   }
 
+  // Second-row streets: an arc between the first and second ring of buildings, in districts that have two rings.
+  for (const sec of model.sectors) {
+    for (const sr of sec.streets) {
+      const len = sec.end - sec.start;
+      const arc = add(
+        new THREE.RingGeometry(sr - LAYOUT.streetW / 2, sr + LAYOUT.streetW / 2, Math.max(8, Math.ceil((len * 64) / (Math.PI * 2))), 1, -sec.end, len),
+        roadMat,
+      );
+      arc.rotation.x = -Math.PI / 2;
+      arc.position.y = 0.0145;
+    }
+  }
+
   // Plaza: two stepped stone tiers, neon rings, logo.
   const plazaBase = add(new THREE.CylinderGeometry(LAYOUT.plazaR, LAYOUT.plazaR + 0.1, 0.26, 64), plazaMat);
   plazaBase.position.y = 0.13;
@@ -138,6 +151,10 @@ export function createWorld(model: CityModel, opts: { lowPower: boolean; shadows
       if (d < (c.level === 2 ? 2.2 : 1.05)) return true;
     }
     const a = Math.atan2(z, x);
+    for (const s of model.sectors) {
+      const rel = (((a - s.start) % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+      if (rel < s.end - s.start && s.streets.some((sr) => Math.abs(r - sr) < LAYOUT.streetW / 2 + 0.35)) return true;
+    }
     for (const s of model.sectors) {
       const da = a - s.start;
       const along = r * Math.cos(da);
