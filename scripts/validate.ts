@@ -8,6 +8,9 @@ const raw: unknown = JSON.parse(readFileSync('content/city.json', 'utf8'));
 const errors = validateCity(raw);
 
 if (!errors.length) {
+  for (const g of (raw as CityData).owner.gallery ?? []) {
+    if (!/^https?:\/\//.test(g.src) && !existsSync(join('public', g.src))) errors.push(`owner: gallery image public/${g.src} does not exist`);
+  }
   for (const p of (raw as CityData).projects) {
     for (const g of p.gallery ?? []) {
       if (!/^https?:\/\//.test(g.src) && !existsSync(join('public', g.src))) {

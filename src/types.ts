@@ -27,6 +27,12 @@ export interface Owner {
   role: LocalizedText;
   bio: LocalizedText;
   links: OwnerLink[];
+  /** Optional profile picture under public/, e.g. "about/profile.jpg". Shown in the About card instead of the initials. */
+  photo?: string;
+  /** Optional bigger version of the photo, opened when the photo is clicked. */
+  photoLarge?: string;
+  /** Optional certificates shown as thumbnails in the About card. Images under public/. */
+  gallery?: GalleryItem[];
 }
 
 export interface District {
@@ -70,6 +76,8 @@ export interface GalleryItem {
   /** Path under public/, e.g. "assets/projects/threat-map/board.png", or an https URL. */
   src: string;
   caption?: LocalizedText;
+  /** Show this item only when the site is in this language. Without it the item shows in both. */
+  lang?: Lang;
 }
 
 export interface ProjectLinks {

@@ -41,7 +41,7 @@ export function $(sel: string): HTMLElement {
   return el;
 }
 
-/** Resolve a gallery/asset path against the site base (GitHub Pages lives under /<repo>/). */
+/** Resolve a gallery/asset path against the site base (GitHub Pages lives under /City-Res/). */
 export function assetUrl(src: string): string {
   return /^https?:\/\//.test(src) ? src : import.meta.env.BASE_URL + src.replace(/^\//, '');
 }

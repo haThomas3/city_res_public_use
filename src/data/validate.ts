@@ -45,6 +45,13 @@ export function validateCity(raw: unknown): string[] {
     if (!isNonEmpty(owner.initials) || owner.initials.length > 3) e.push('owner.initials must be 1-3 characters');
     if (!isLoc(owner.role)) e.push('owner.role is missing');
     if (!isLoc(owner.bio)) e.push('owner.bio is missing');
+    if (owner.photo !== undefined && (typeof owner.photo !== 'string' || !/^[\w-]+\/[\w.-]+\.(jpe?g|png|webp)$/i.test(owner.photo))) e.push('owner.photo must be a path like about/profile.jpg');
+    if (owner.photoLarge !== undefined && (typeof owner.photoLarge !== 'string' || !/^[\w-]+\/[\w.-]+\.(jpe?g|png|webp)$/i.test(owner.photoLarge))) e.push('owner.photoLarge must be a path like about/profile-large.jpg');
+    if (owner.gallery !== undefined && !Array.isArray(owner.gallery)) e.push('owner.gallery must be a list');
+    else if (Array.isArray(owner.gallery)) owner.gallery.forEach((g, j) => {
+      if (!isObj(g) || !isNonEmpty(g.src)) e.push(`owner.gallery[${j}] needs src`);
+      else if (g.lang !== undefined && g.lang !== 'en' && g.lang !== 'he') e.push(`owner.gallery[${j}].lang must be "en" or "he"`);
+    });
     if (!Array.isArray(owner.links)) e.push('owner.links must be a list');
     else owner.links.forEach((l, i) => {
       if (!isObj(l) || !isLoc(l.label) || !(isUrl(l.url) || (typeof l.url === 'string' && /^[\w-]+\/[\w.-]+\.pdf$/.test(l.url)))) e.push(`owner.links[${i}] needs a label and an https://, mailto: or local .pdf url`);
